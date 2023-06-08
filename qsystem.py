@@ -17,18 +17,22 @@ class QComputer():
 
         self.job=None
         self.output=None
+        self.instructionSet=None
 
     def resetQubit(self, qubitIndex=0):
-        self.circuit.reset(qubitIndex)
+        self.instructionSet=self.circuit.reset(qubitIndex)
+
+    def resetQubitRange(self, *qubitList):
+        self.instructionSet=self.circuit.reset(qubitList)
         
-    def addNotGate(self, qubitIndex=0):
-        self.circuit.x(qubitIndex)
+    def notGate(self, qubitIndex=0):
+        self.instructionSet=self.circuit.x(qubitIndex)
 
     def addBarrier(self):
-        self.circuit.barrier()
+        self.instructionSet=self.circuit.barrier()
 
     def addMeasure(self, qubitIndex, bitIndex):
-        self.circuit.measure(qubitIndex, bitIndex)
+        self.instructionSet=self.circuit.measure(qubitIndex, bitIndex)
 
     def plotCircuit(self, display=True, saveFile=False, saveAs='circuit.png'):
         self.circuit.draw('mpl')
@@ -45,5 +49,8 @@ class QComputer():
         self.output = self.job.result().get_memory()[0]
         return self.output
 
+    def cNotGate(self, qubitStart, qubitEnd):
+        self.instructionSet=self.circuit.cx(control_qubit=qubitStart, target_qubit=qubitEnd)
 
-        
+    def hadamardGate(self, qubitIndex=0):
+        self.instructionSet=self.circuit.h(qubit=qubitIndex)
