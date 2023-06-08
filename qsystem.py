@@ -1,5 +1,5 @@
 import numpy as np
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, Aer
 from qiskit_aer import AerSimulator
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
@@ -15,6 +15,9 @@ class QComputer():
         else:
             self.circuit = QuantumCircuit(self.numQubits, self.numBits)
 
+        self.job=None
+        self.output=None
+
     def resetQubit(self, qubitIndex=0):
         self.circuit.reset(qubitIndex)
         
@@ -29,12 +32,18 @@ class QComputer():
 
     def plotCircuit(self, display=True, saveFile=False, saveAs='circuit.png'):
         self.circuit.draw('mpl')
+        if saveFile:
+            plt.savefig(saveAs)
         if display:
             plt.show()
 
-        if saveFile:
-            plt.savefig(saveAs)
-
+    def runSimulator(self, numshots=1):
+        # We'll run the program on a simulator
+        backend = Aer.get_backend('aer_simulator')
+        # Since the output will be deterministic, we can use just a single shot to get it
+        self.job = backend.run(self.circuit, shots=numshots, memory=True)
+        self.output = self.job.result().get_memory()[0]
+        return self.output
 
 
         
