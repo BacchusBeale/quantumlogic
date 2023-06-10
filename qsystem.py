@@ -1,7 +1,9 @@
 import numpy as np
 from qiskit import QuantumCircuit, Aer
+from qiskit import transpile
+from qiskit import QuantumRegister, ClassicalRegister
 from qiskit_aer import AerSimulator
-from qiskit.visualization import plot_histogram
+from qiskit.visualization import plot_histogram, plot_state_city
 import matplotlib.pyplot as plt
 from qiskit.quantum_info import Statevector
 from qiskit.quantum_info import Operator
@@ -41,12 +43,62 @@ class QComputer():
         if display:
             plt.show()
 
-    def runSimulator(self, numshots=1):
+    def stateVector(self):
+        print("state vector")
+        backend = Aer.get_backend('statevector_simulator')
+        self.job = backend.run(self.circuit)
+        self.output = self.job.result()
+        outputstate = self.output.get_statevector(self.circuit, decimals=3)
+        return outputstate
+    
+    def plotStateVector(self, display=True, saveFile=True, saveAs='statevector.png'):
+        print("plot state vector")
+        state = self.stateVector()
+        plot_state_city(state)
+        if saveFile:
+            plt.savefig(saveAs)
+
+        if display:
+            plt.show()
+
+        return state
+
+    def runAerSimulator(self, numshots=1, display=True, saveFile=True, saveAs='aer.png'):
         # We'll run the program on a simulator
         backend = Aer.get_backend('aer_simulator')
         # Since the output will be deterministic, we can use just a single shot to get it
-        self.job = backend.run(self.circuit, shots=numshots, memory=True)
-        self.output = self.job.result().get_memory()[0]
+        compile = transpile(self.circuit, backend=backend)
+        self.job = backend.run(compile, shots=numshots)
+        
+        self.output = self.job.result()
+        counts = self.output.get_counts()
+        plot_histogram(counts)
+
+        if saveFile:
+            plt.savefig(saveAs)
+
+        if display:
+            plt.show()
+
+        return self.output
+    
+    def runQasmSimulator(self, numshots=1024, display=True, saveFile=True, saveAs='qasm.png'):
+        # We'll run the program on a simulator
+        backend = Aer.get_backend('qasm_simulator')
+        # Since the output will be deterministic, we can use just a single shot to get it
+        compile = transpile(self.circuit, backend=backend)
+        self.job = backend.run(compile, shots=numshots)
+        
+        self.output = self.job.result()
+        counts = self.output.get_counts()
+        plot_histogram(counts)
+
+        if saveFile:
+            plt.savefig(saveAs)
+            
+        if display:
+            plt.show()
+
         return self.output
 
     def cNotGate(self, qubitStart, qubitEnd):
