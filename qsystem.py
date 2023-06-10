@@ -4,11 +4,22 @@ from qiskit import transpile
 from qiskit import QuantumRegister, ClassicalRegister
 from qiskit_aer import AerSimulator
 from qiskit.visualization import plot_histogram, plot_state_city
+from qiskit.visualization import plot_state_qsphere, plot_bloch_multivector
+from qiskit.visualization import plot_bloch_vector, plot_state_qsphere
+from qiskit.visualization import plot_state_paulivec, plot_state_hinton
 import matplotlib.pyplot as plt
 from qiskit.quantum_info import Statevector
 from qiskit.quantum_info import Operator
 
+CITY=0
+QSPHERE=1
+BLOCH=2
+BLOCH_MULTI=3
+PAULIVEC=4
+HINTON=5
+
 class QComputer():
+
     def __init__(self, numQubits=1, numBits=1) -> None:
         self.numQubits = numQubits
         self.numBits = numQubits
@@ -51,17 +62,41 @@ class QComputer():
         outputstate = self.output.get_statevector(self.circuit, decimals=3)
         return outputstate
     
-    def plotStateVector(self, display=True, saveFile=True, saveAs='statevector.png'):
+    def plotStateVector(self,
+                        plotType=CITY,
+                        display=True, 
+                        saveFile=True, 
+                        saveAs='statevector.png'):
         print("plot state vector")
-        state = self.stateVector()
-        plot_state_city(state)
-        if saveFile:
-            plt.savefig(saveAs)
+        state=None
+        ok=False
+        try:
+            state = self.stateVector()
+            if plotType==CITY:
+                plot_state_city(state)
+            elif plotType==BLOCH:
+                plot_bloch_vector(state)
+            elif plotType==BLOCH_MULTI:
+                plot_bloch_multivector(state)
+            elif plotType==PAULIVEC:
+                plot_state_paulivec(state)
+            elif plotType==HINTON:
+                plot_state_hinton(state)
+            else:
+                ok = False
 
-        if display:
-            plt.show()
+            if saveFile:
+                plt.savefig(saveAs)
 
-        return state
+            if display:
+                plt.show()
+
+            ok=True
+        except BaseException as e:
+            print("Plot error: {e}")
+            ok=False
+        
+        return ok, state
 
     def runAerSimulator(self, numshots=1, display=True, saveFile=True, saveAs='aer.png'):
         # We'll run the program on a simulator
