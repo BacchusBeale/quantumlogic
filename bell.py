@@ -40,15 +40,16 @@ def bellState():
     q.cNotGate(qubitStart=0,
                qubitEnd=1)
     
-    for i in range(6):
+    for i in range(1):
         ok, state = q.plotStateVector(
             plotType=i,
-            display=True,
+            display=False,
             saveAs=f'beforeMeasure{i}.png',
             saveFile=True
         )
          
         print(f"Success? {ok}")
+        print(state)
 
     q.addBarrier()
     q.addMeasure(0,0)
@@ -63,7 +64,7 @@ def bellState():
     output = q.stateVector()
     print(output)
 
-    for i in range(6):
+    for i in range(1):
         ok, state = q.plotStateVector(
             plotType=i,
             display=False,
@@ -75,7 +76,8 @@ def bellState():
 
     answers = []
 
-    result = q.runQasmSimulator(
+    result = q.runSimulator(
+        simType=qsystem.SIM_QASM,
         numshots=1024,
         saveAs='qasm.png',
         saveFile=True
@@ -88,19 +90,5 @@ def bellState():
     with open('qasm.txt', 'w') as f:
         f.write(txt)
 
-    # answers = []
-
-    # result = q.runAerSimulator(
-    #     numshots=1024,
-    #     saveAs='aer.png',
-    #     saveFile=True
-    # )
-    
-    # print(result)
-    # answers.append(str(result))
-    
-    # txt = ",".join(answers)
-    # with open('aer.txt', 'w') as f:
-    #     f.write(txt)
 
 bellState()
